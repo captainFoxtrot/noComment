@@ -7,3 +7,4 @@ To run a NoComment file, simply type:
 ```
 ./nocomment.py /path/to/code.noc
 ```
+Sample NoComment code can be found in the [tests](tests/) directory.
