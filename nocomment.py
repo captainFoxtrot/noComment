@@ -99,8 +99,13 @@ def exec(char: str):
 
 # Pass a string of NoComment code into this function to run it.
 def exec_str(_code: str):
-    for char in _code: exec(char)
 
+    global codePtr
+
+    while codePtr < len(_code):
+        exec(_code[codePtr])
+        codePtr += 1
+        
 # This part will not be run if this script is being run through an import.
 if __name__ == "__main__":
 
