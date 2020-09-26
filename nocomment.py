@@ -31,7 +31,7 @@ memoryPtr:int = 0
 stack:bytearray = bytearray(STACKSIZE)
 
 # Execute a single instruction (character)
-def exec(char: str):
+def exec_char(char: str):
 
     global memory, memoryPtr, MEMORYSIZE, stack
 
@@ -46,17 +46,21 @@ def exec(char: str):
         try: memory[memoryPtr] -= 1
         # Integer underflow
         except ValueError: memory[memoryPtr] = 256
+            
+    elif char == "c":
+        # Clear value of pointer
+        memory[memoryPtr] = 0
 
     elif char == "l":
-        # Decrement pointer
-        if memoryPtr: memoryPtr -= 1
         # About to underflow?
+        if memoryPtr: memoryPtr -= 1
+        # Decrement pointer
         else: memoryPtr = MEMORYSIZE - 1
 
     elif char == "r":
-        # Increment pointer
-        if memoryPtr == 256: memoryPtr = 0
         # About to overflow?
+        if memoryPtr == 256: memoryPtr = 0
+        # Increment pointer
         else: memoryPtr += 1
 
     elif char == "n":
@@ -103,7 +107,7 @@ def exec_str(_code: str):
     global codePtr
 
     while codePtr < len(_code):
-        exec(_code[codePtr])
+        exec_char(_code[codePtr])
         codePtr += 1
         
 # This part will not be run if this script is being run through an import.
