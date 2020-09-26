@@ -69,7 +69,7 @@ def exec(char: str):
         # Drop an item from the stack
         del stack[-1]
 
-    elif char == "j":
+    elif char == "s":
         # Check if the value of the pointer is greater than zero
         if memory[memoryPtr] != 0:
             # Jump forward x number of spaces where x is the value on the top of the stack
