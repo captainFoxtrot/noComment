@@ -121,7 +121,7 @@ if __name__ == "__main__":
         with open(FILENAME, "r") as codeFile:
             code = codeFile.read()
 
-    # User did not enter a file to run, enter REPL
+    # User did not enter a file to run
     except IndexError:
         print("Enter the name of a file to run.")
 
