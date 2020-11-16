@@ -3,8 +3,10 @@ An esoteric programming language that aims to combine the simplicity of Brainfuc
 
 See more info at https://esolangs.org/wiki/NoComment.
 
-To run a NoComment file, simply type:
+To run a NoComment file:
 ```
-python3 nocomment.py /path/to/code.noc
+gcc -o nocomment nocomment.c
+./nocomment path/to/file.noc
 ```
+
 Sample NoComment code can be found in the [tests](tests/) directory.
