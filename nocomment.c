@@ -6,11 +6,18 @@
 #define         STACKSIZE       10000
 
 FILE*           f;
+long            filelen;
 uint8_t*        memory;
 uint8_t*        memptr;
 uint8_t*        stackbase;
 uint8_t*        stackptr;
 char            ch;
+
+void free_allocated(void){
+    fclose(f);
+    free(memory);
+    free(stackbase);
+}
 
 int main(const int argc, const char** argv){
 
@@ -37,6 +44,11 @@ int main(const int argc, const char** argv){
         // Print error message and exit if stack allocation failed
         if(!stackbase)
                 goto allocationerror;
+        
+        // https://stackoverflow.com/questions/238603/how-can-i-get-a-files-size-in-c
+        fseek(f, 0, SEEK_END);
+        filelen = ftell(f);
+        rewind(f);
 
         while(1){
                 // Get the next character in the file
@@ -84,6 +96,13 @@ int main(const int argc, const char** argv){
 
                         // Push value of pointer to stack
                         case 'n':
+                                // Check for stack overflow
+                                if(stackptr >= stackbase + STACKSIZE){
+                                        printf("Stack overflow.\n");
+                                        free_allocated();
+                                        return 1;
+                                }
+
                                 // Put the ptr val on stack
                                 *stackptr = *memptr;
 
@@ -94,6 +113,13 @@ int main(const int argc, const char** argv){
 
                         // Pop from stack to value of pointer
                         case 'f':
+                                // Check for stack underflow
+                                if(stackptr <= stackbase){
+                                        printf("Stack underflow.\n");
+                                        free_allocated();
+                                        return 1;
+                                }
+
                                 // Decrement stack pointer
                                 --stackptr;
 
@@ -104,14 +130,33 @@ int main(const int argc, const char** argv){
 
                         // Forward jump if non-zero value of pointer
                         case 's':
-                                if(*memptr)
-                                        fseek(f, *(stackptr - 1), SEEK_CUR);
+                                if(*memptr){
+                                        // If the jump will not take us out of bounds
+                                        if(ftell(f) + *(stackptr - 1) <= filelen)
+                                                // Perform jump
+                                                fseek(f, *(stackptr - 1), SEEK_CUR);
+                                        else {
+                                                printf("Code pointer out of bounds.\n");
+                                                free_allocated();
+                                                return 1;
+                                        }
+                                }
                                 break;
 
                         // Backwards jump if non-zero value of pointer
                         case 'b':
-                                if(*memptr)
-                                        fseek(f, -*(stackptr - 1), SEEK_CUR);
+                                if(*memptr){
+                                        // If the jump will not take us out of bounds
+                                        if(*(stackptr - 1) - 1 <= ftell(f))
+                                                // Perform jump
+                                                fseek(f, -*(stackptr - 1), SEEK_CUR);
+                                        else {
+                                                // Print error message, exit
+                                                printf("Code pointer out of bounds.\n");
+                                                free_allocated();
+                                                return 1;
+                                        }
+                                }
                                 break;
 
                         // Print value of pointer as ASCII char
@@ -122,19 +167,20 @@ int main(const int argc, const char** argv){
                         // Unknown instruction
                         default:
                                 printf("Illegal instruction %i at character %li.\n", ch, ftell(f));
+
+                                free_allocated();
                                 return 1;
                 }
         }
 
         // Close the file and deallocate memory
-        fclose(f);
-        free(memory);
-        free(stackbase);
+        free_allocated();
 
         // Exit
         return 0;
 
         allocationerror:
                 printf("Unable to allocate memory.\n");
+                free_allocated();
                 return 1;
 }
